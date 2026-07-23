@@ -34,6 +34,9 @@ html[data-theme="dark"]{
   --onpos:#0b1117; --amberink:#ffc04d; --onamber:#3d2a00; --neutral:#8b9aa8; --onbarsub:#9fb0c2;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+/* form controls do NOT inherit colour by default — without this they render
+   as UA black, which is invisible on the dark theme */
+button,input,select,textarea{color:inherit}
 body{
   background:var(--paper);color:var(--ink);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
@@ -144,7 +147,7 @@ h1,h2,h3,.disp{font-family:'Archivo Black',system-ui,sans-serif;letter-spacing:-
 .pcol>h4{font:700 10px/1 'IBM Plex Mono';letter-spacing:.14em;padding:8px 10px;color:var(--onpos);text-align:center}
 .pcol.QB>h4{background:var(--qb)} .pcol.RB>h4{background:var(--rb)}
 .pcol.WR>h4{background:var(--wr)} .pcol.TE>h4{background:var(--te)}
-.p{padding:7px 9px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .1s;display:block;width:100%;text-align:left;background:none;border-left:0;border-right:0;border-top:0;font:inherit}
+.p{padding:7px 9px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .1s;display:block;width:100%;text-align:left;background:none;border-left:0;border-right:0;border-top:0;font:inherit;color:inherit}
 .p:hover:not(:disabled){background:var(--soft)}
 .p:disabled{opacity:.32;cursor:not-allowed}
 .p .pn{font-size:12px;overflow-wrap:anywhere;font-weight:700;line-height:1.2}
@@ -617,7 +620,7 @@ function nameCheck(raw){
 /* ---------- optional global leaderboard ----------
    Leave blank to keep the game fully offline. Point it at the Cloudflare Worker
    in leaderboard-worker.js to turn on a shared board.                          */
-const LEADERBOARD_URL='https://draft-roulette-leaderboard.jtassani511.workers.dev/top';
+const LEADERBOARD_URL='https://draft-roulette-leaderboard.jtassani511.workers.dev';
 async function boardSubmit(entry){
   if(!LEADERBOARD_URL) return null;
   try{
