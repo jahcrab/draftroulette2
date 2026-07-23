@@ -584,7 +584,7 @@ function nameCheck(raw){
 /* ---------- optional global leaderboard ----------
    Leave blank to keep the game fully offline. Point it at the Cloudflare Worker
    in leaderboard-worker.js to turn on a shared board.                          */
-const LEADERBOARD_URL='';
+const LEADERBOARD_URL='find ~ -name ".git" -type d 2>/dev/null';
 async function boardSubmit(entry){
   if(!LEADERBOARD_URL) return null;
   try{
