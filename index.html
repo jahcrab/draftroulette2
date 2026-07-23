@@ -467,7 +467,7 @@ function renderBoard(b){
     el.onclick=()=>{
       const nm=el.dataset.n;
       const raw=b.p.find(x=>x[0]===nm);
-      pick({name:raw[0],pos:raw[1],pts:raw[2],g:raw[3],rd:raw[4],pid:raw[5],season:b.s,team:b.n});
+      pick({name:raw[0],pos:raw[1],pts:raw[2],g:raw[3],rd:raw[4],pid:raw[5],season:b.s,team:b.n,abbr:b.a});
     };
   });
   $('passBtn').classList.toggle('hidden', anyFits);
@@ -777,21 +777,21 @@ async function buildCard(total,tier,pct){
   for(let i=0;i<W;i+=42){ x.beginPath();x.moveTo(i,0);x.lineTo(i,H);x.stroke();
                           x.beginPath();x.moveTo(0,i);x.lineTo(W,i);x.stroke(); }
   const P=64;
-  x.fillStyle=WHITE; x.font='800 46px Archivo Black, system-ui, sans-serif';
+  x.fillStyle=WHITE; x.font='800 46px "Archivo Black", system-ui, sans-serif';
   x.fillText('DRAFT',P,86);
   const dw=x.measureText('DRAFT').width;
   x.strokeStyle=WHITE; x.lineWidth=2;
   x.strokeText('ROULETTE',P+dw+14,86);
-  x.fillStyle=DIM; x.font='700 17px IBM Plex Mono, monospace';
+  x.fillStyle=DIM; x.font='700 17px "IBM Plex Mono", monospace';
   x.fillText((mode==='hard'?'HARD MODE':'NORMAL MODE'),P,120);
 
   // headline record
-  x.fillStyle=WHITE; x.font='800 150px Archivo Black, system-ui, sans-serif';
+  x.fillStyle=WHITE; x.font='800 150px "Archivo Black", system-ui, sans-serif';
   const rec=tier.w+'\u2013'+tier.l;
   x.fillText(rec,P,272);
-  x.fillStyle=AMBER; x.font='700 30px IBM Plex Mono, monospace';
+  x.fillStyle=AMBER; x.font='700 30px "IBM Plex Mono", monospace';
   x.fillText(total.toFixed(1)+' PPR',P+x.measureText('').width,318);
-  x.fillStyle=DIM; x.font='400 21px IBM Plex Mono, monospace';
+  x.fillStyle=DIM; x.font='400 21px "IBM Plex Mono", monospace';
   x.fillText('better than '+pct.toFixed(0)+'% of drafted teams',P,352);
   x.strokeStyle=WHITE; x.lineWidth=3;
   x.beginPath();x.moveTo(P,378);x.lineTo(W-P,378);x.stroke();
@@ -804,23 +804,23 @@ async function buildCard(total,tier,pct){
     x.fillStyle=CARD; x.fillRect(P,y,W-P*2,78);
     x.strokeStyle=LINE; x.lineWidth=1; x.strokeRect(P+.5,y+.5,W-P*2-1,77);
     x.fillStyle=POS[p.pos]||DIM; x.fillRect(P,y,7,78);
-    x.fillStyle=POS[p.pos]||DIM; x.font='700 15px IBM Plex Mono, monospace';
+    x.fillStyle=POS[p.pos]||DIM; x.font='700 15px "IBM Plex Mono", monospace';
     x.fillText(SLOT_LAB[i],P+24,y+30);
-    x.fillStyle=WHITE; x.font='800 27px Archivo Black, system-ui, sans-serif';
+    x.fillStyle=WHITE; x.font='800 27px "Archivo Black", system-ui, sans-serif';
     let nm=p.name; while(x.measureText(nm).width>470 && nm.length>4) nm=nm.slice(0,-1);
     if(nm!==p.name) nm=nm.slice(0,-1)+'\u2026';
     x.fillText(nm,P+92,y+36);
-    x.fillStyle=DIM; x.font='400 16px IBM Plex Mono, monospace';
+    x.fillStyle=DIM; x.font='400 16px "IBM Plex Mono", monospace';
     const rd=slot.indexOf(p); 
     x.fillText(p.season+' '+p.abbr+'   \u00b7   round '+(rd>=0?rd+1:'\u2014'),P+92,y+62);
-    x.fillStyle=AMBER; x.font='700 30px IBM Plex Mono, monospace';
+    x.fillStyle=AMBER; x.font='700 30px "IBM Plex Mono", monospace';
     const v=p.pts.toFixed(1);
     x.fillText(v,W-P-28-x.measureText(v).width,y+48);
     y+=88;
   }
-  x.fillStyle=AMBER; x.font='700 22px IBM Plex Mono, monospace';
+  x.fillStyle=AMBER; x.font='700 22px "IBM Plex Mono", monospace';
   x.fillText('draftroulettegame.com',P,H-42);
-  x.fillStyle=DIM; x.font='400 18px IBM Plex Mono, monospace';
+  x.fillStyle=DIM; x.font='400 18px "IBM Plex Mono", monospace';
   const t='26 NFL seasons \u00b7 real ADP';
   x.fillText(t,W-P-x.measureText(t).width,H-42);
   return new Promise(r=>c.toBlob(r,'image/png'));
@@ -830,6 +830,7 @@ async function shareCard(total,tier,pct,btn){
   btn.disabled=true; btn.textContent='Rendering\u2026';
   try{
     const blob=await buildCard(total,tier,pct);
+    if(!blob) throw new Error('canvas produced no image');
     const file=new File([blob],'draft-roulette.png',{type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
       await navigator.share({files:[file],title:'Draft Roulette',
@@ -837,7 +838,9 @@ async function shareCard(total,tier,pct,btn){
       btn.textContent='Shared';
     } else {
       const u=URL.createObjectURL(blob), a=document.createElement('a');
-      a.href=u; a.download='draft-roulette.png'; a.click();
+      a.href=u; a.download='draft-roulette.png';
+      document.body.appendChild(a);        // Firefox ignores clicks on detached nodes
+      a.click(); a.remove();
       setTimeout(()=>URL.revokeObjectURL(u),4000);
       btn.textContent='Saved';
     }
